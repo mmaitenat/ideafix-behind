@@ -91,35 +91,19 @@ X.train %>%
 Y.train %>%
   filter(complete_id %in% X.train$complete_id) -> Y.train
 
-subsampMatrices <- function(X, Y, n.keep, mut.source) {
-  if (nrow(X) != nrow(Y)) {
-    stop("X and Y matrices should have the same number of instances")
-  }
-  idx.to.subsample <- which(X$source == mut.source)
-  idx.to.keep <- setdiff(1:nrow(Y), idx.to.subsample)
-  subsample.idx <- base::sample(idx.to.subsample, n.keep)
-  all.idx.to.keep <- sort(c(idx.to.keep, subsample.idx))
-  X <- X[all.idx.to.keep,]
-  Y <- Y[all.idx.to.keep,]
-  return(list(X = X, Y = Y))
-}
+# subsampMatrices <- function(X, Y, n.keep, mut.source) {
+#   if (nrow(X) != nrow(Y)) {
+#     stop("X and Y matrices should have the same number of instances")
+#   }
+#   idx.to.subsample <- which(X$source == mut.source)
+#   idx.to.keep <- setdiff(1:nrow(Y), idx.to.subsample)
+#   subsample.idx <- base::sample(idx.to.subsample, n.keep)
+#   all.idx.to.keep <- sort(c(idx.to.keep, subsample.idx))
+#   X <- X[all.idx.to.keep,]
+#   Y <- Y[all.idx.to.keep,]
+#   return(list(X = X, Y = Y))
+# }
 
-# subsample in case it's needed
-max.ratio <- 50
-deam.mut.ratio.train <- table(X.train$source)
-if (deam.mut.ratio.train["deam"] > max.ratio*deam.mut.ratio.train["mut"]) { # if TRUE subsample deaminations
-  cat("Train data: Subsampling deaminations\n")
-  deam.toKeep.train <- deam.mut.ratio.train["mut"]*max.ratio
-  subs.train.XY <- subsampMatrices(X = X.train, Y = Y.train, n.keep = deam.toKeep.train, mut.source = "deam")
-  X.train <- subs.train.XY[["X"]]
-  Y.train <- subs.train.XY[["Y"]]
-} else if (deam.mut.ratio.train["deam"] < max.ratio*deam.mut.ratio.train["mut"]) { # if true subsample mutation
-  cat("Train data: Subsampling mutations\n")
-  mut.toKeep.train <- ceiling(deam.mut.ratio.train["deam"]/max.ratio)
-  subs.train.XY <- subsampMatrices(X = X.train, Y = Y.train, n.keep = mut.toKeep.train, mut.source = "mut")
-  X.train <- subs.train.XY[["X"]]
-  Y.train <- subs.train.XY[["Y"]]
-}
 
 # Pull necessary features
 X.cols <- setdiff(colnames(X.train), c("source", "current", "bases", "read.length", "both.reads.aligned", "sample", "frag.length.frac", "isSNP"))
